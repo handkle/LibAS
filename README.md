@@ -35,6 +35,10 @@ python -m venv .venv
 - transport.py：HTTP 请求
 - test.py：解析逻辑测试
 
-## 项目来源
+## 项目来源与许可
 
-本项目参考现有 C# 项目进行 Python 迁移。
+本项目基于 [EJianZQ/IGoLibrary](https://github.com/EJianZQ/IGoLibrary)
+进行 Python 迁移与学习开发。
+
+原项目采用 MIT License，原许可证全文保留于 [LICENSE.txt](LICENSE.txt)。
+Python 迁移及后续修改由 handkle 完成。
