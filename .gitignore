@@ -1,0 +1,25 @@
+#Python environment
+.venv/
+venv/
+env/
+
+#Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Editor config
+.idea/
+.vscode/
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+cookie.txt
+cookies.txt
+cookies.json
+secrets.json
+
+# Log
+*.log
