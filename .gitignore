@@ -23,3 +23,6 @@ secrets.json
 
 # Log
 *.log
+# Local uv tools and cache
+.tools/
+.uv-cache/

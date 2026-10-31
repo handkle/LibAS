@@ -14,21 +14,55 @@
 
 当前仅完成查询与本地选座，尚未实现预约记录查询、提交预约或取消预约。场馆开放状态和座位状态来自本次接口响应，本地选择成功不代表可以预约。
 
-## 安装
+## 安装与环境管理
 
-需要可运行的 Python 3 环境。以下命令适用于 Windows PowerShell，请在项目根目录（包含 `main.py` 的目录）执行。
+项目使用 uv 管理 Python 3.13 环境及依赖。以下命令适用于 Windows PowerShell，请在包含 `main.py` 的项目根目录执行。
+
+首次使用 uv，可按 [官方安装说明](https://docs.astral.sh/uv/getting-started/installation/) 安装：
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-网络请求使用 `httpx`；测试使用 Python 自带的 `unittest`。依赖版本记录在 `requirements.txt` 中。
+安装完成后重新打开终端，执行：
+
+```powershell
+uv --version
+uv sync --locked
+```
+
+`uv sync --locked` 按 `uv.lock` 安装依赖到项目的 `.venv`；使用 `uv run` 时无需手动激活环境。当前项目指定 Python 3.13 系列，与迁移时使用的解释器版本系列一致。
+
+本机 uv 安装在项目的 `.tools` 目录（已被 Git 忽略）。在本机项目根目录执行以下命令，即可在当前终端使用 `uv`；新终端需要再次执行。其他电脑请使用上面的官方安装方式。
+
+```powershell
+$env:Path = "$PWD\.tools;$env:Path"
+$env:UV_CACHE_DIR = "$PWD\.uv-cache"
+```
+
+网络请求使用 `httpx`，测试使用 Python 自带的 `unittest`。直接依赖写在 `pyproject.toml`，完整版本由 `uv.lock` 锁定。
+
+常用命令：
+
+```powershell
+uv add 包名
+uv remove 包名
+uv sync --locked
+uv run python test.py
+```
+
+`requirements.txt` 是从锁文件生成的 pip 兼容清单，不再手工维护。依赖变更后可重新导出：
+
+```powershell
+uv export --locked --format requirements-txt --no-hashes --output-file requirements.txt
+```
+
+将 `pyproject.toml`、`uv.lock`、`.python-version` 和更新后的 `requirements.txt` 提交到版本管理；`.venv/` 继续忽略。PyCharm 的项目解释器可继续选择项目中的 `.venv\Scripts\python.exe`。
 
 ## 运行
 
 ```powershell
-.\.venv\Scripts\python.exe main.py
+uv run python main.py
 ```
 
 按顺序操作：
@@ -63,7 +97,7 @@ Cookie 需要自行准备；当前没有自动登录或获取 Cookie 的流程�
 ## 测试
 
 ```powershell
-.\.venv\Scripts\python.exe test.py
+uv run python test.py
 ```
 
 现有三个测试使用模拟数据验证场馆列表解析：
@@ -83,7 +117,10 @@ Cookie 需要自行准备；当前没有自动登录或获取 Cookie 的流程�
 | `transport.py` | 使用 HTTPX 发送请求、检查 HTTP 状态并解析 JSON |
 | `models.py` | 当前为空文件 |
 | `test.py` | 场馆列表解析的单元测试 |
-| `requirements.txt` | Python 依赖版本 |
+| `pyproject.toml` | 项目信息、Python 版本范围与直接依赖 |
+| `uv.lock` | uv 生成的完整依赖锁文件 |
+| `.python-version` | 项目默认 Python 版本系列 |
+| `requirements.txt` | 从 uv.lock 导出的 pip 兼容清单 |
 | `LICENSE.txt` | 保留的原项目许可证 |
 
 ## 代码流程
@@ -110,3 +147,5 @@ main.py
 
 原项目采用 MIT License，原许可证全文保留于 [LICENSE.txt](LICENSE.txt)。
 Python 迁移及后续修改由 handkle 完成。
+
+

@@ -139,3 +139,68 @@ def get_library_layout(cookie, library_id):
         raise ValueError("场馆布局响应结构不符合预期")from exc
 
     return library
+
+
+RESERVATION_QUERY = """
+query index {
+  userAuth {
+    reserve {
+      reserve {
+        lib_id
+        lib_name
+        seat_key
+        seat_name
+        exp_date
+        exp_date_str
+      }
+    }
+  }
+}
+"""
+
+def parse_reservation(result):
+    """解析当前预约；无记录时返回 None。"""
+    if not isinstance(result, dict):
+        raise ValueError("预约响应不是字典")
+
+    if result.get("errors"):
+        raise ValueError("服务端返回 GraphQL 错误，未取得预约信息")
+
+    try:
+        reserve_node = result["data"]["userAuth"]["reserve"]
+    except (KeyError, TypeError) as exc:
+        raise ValueError("响应缺少预约数据节点") from exc
+
+    if not isinstance(reserve_node, dict):
+        raise ValueError("预约数据节点格式不正确")
+
+    reservation = reserve_node.get("reserve")
+
+    if reservation is None:
+        return None
+
+    if not isinstance(reservation, dict):
+        raise ValueError("预约记录格式不正确")
+
+    required_fields = (
+        "lib_id",
+        "lib_name",
+        "seat_key",
+        "seat_name",
+        "exp_date",
+    )
+
+    if any(field not in reservation for field in required_fields):
+        raise ValueError("预约记录缺少必要字段")
+
+    return reservation
+
+def get_reservation(cookie):
+    """发送一次查询，返回当前预约记录。"""
+    payload = {
+        "operationName": "index",
+        "query": RESERVATION_QUERY,
+    }
+
+    result = post_graghql(cookie, payload)
+    return parse_reservation(result)
